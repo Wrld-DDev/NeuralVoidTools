@@ -2,4 +2,4 @@
 
 
 NeuralDiff.py
-is for comparing to files lines contents and output the unique to a new file and maybe will add the duplicates output to another file if i feel it's necessary.
+\br is for comparing to files lines contents and output the unique to a new file and maybe will add the duplicates output to another file if i feel it's necessary.

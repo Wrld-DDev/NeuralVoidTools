@@ -49,9 +49,11 @@ def compare_files(files, output_file):
         try:
             with open(file, 'r') as f:
                 # Filter out lines that are empty or contain only whitespace
-                file_lines = set(line.strip() for line in f if line.strip())
-                duplicates |= all_lines & file_lines  # Find any duplicates
-                all_lines |= file_lines               # Add all lines to the total set
+                file_lines = {line.strip() for line in f if line.strip()}
+                
+                # Identify duplicates and unique lines
+                duplicates |= all_lines & file_lines  # Accumulate duplicates
+                all_lines |= file_lines               # Accumulate all unique lines
         except FileNotFoundError:
             print(f"{PURPLE}Error: {file} not found.{RESET}")
             sys.exit(1)
@@ -59,19 +61,27 @@ def compare_files(files, output_file):
     # Unique lines are all lines minus the duplicates
     unique_lines = all_lines - duplicates
 
-    # Write unique lines to the output file with a progress bar
-    simulate_loading(f"Saving unique lines to {output_file}...")
+    # Write all unique lines to the output file (all content across files, no duplicates)
+    simulate_loading(f"Saving all unique lines to {output_file}...")
     with open(output_file, 'w') as out:
-        for line in unique_lines:
+        for line in all_lines:
             out.write(line + '\n')
 
     # Print duplicates and unique lines with colors
     print("\nComparison Result:")
+    unique_count = 0
+    duplicate_count = 0
     for line in all_lines:
         if line in duplicates:
+            duplicate_count += 1
             print(f"{BLUE}[{GREEN}+{BLUE}]----| {RESET}{BOLD}{line}{BLUE} |----[{GREEN}+{BLUE}]{BLUE}[{BOLD} {RED}DUPLICATE {RESET}{BLUE}]{RESET}")
         else:
+            unique_count += 1
             print(f"{BLUE}[{GREEN}+{BLUE}]----| {RESET}{BOLD}{line}{BLUE} |----[{GREEN}+{BLUE}]{BLUE}[{BOLD} {GREEN}UNIQUE {RESET}{BLUE}]{RESET}")
+
+    # Print summary counts
+    print(f"\n{BOLD}{GREEN}Total Unique Lines: {unique_count}{RESET}")
+    print(f"{BOLD}{RED}Total Duplicate Lines: {duplicate_count}{RESET}")
 
 if __name__ == "__main__":
     # Argument parser for command line arguments
@@ -95,4 +105,3 @@ if __name__ == "__main__":
 
     # Call the comparison function
     compare_files(args.f, args.o)
-
